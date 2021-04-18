@@ -3,7 +3,7 @@ import './style.css';
 import { useState } from 'react';
 
 function Carousel() {
-    let slides = [{
+    const dishes = [{
         name: 'Jalebi',
         img: 'jalebi.jpeg',
         price: '30',
@@ -57,6 +57,10 @@ function Carousel() {
         price: '250',
         category: 'non-veg'
     }];
+    let categories = Array.from(new Set(dishes.map((dish) => dish.category)));
+    categories.unshift('all');
+    let [slides, setSlides] = useState(dishes);
+    let [selectedCtg, setFiterCategory] = useState('all');
 
     let [x, setX] = useState(0);
     let [activeSlide, setActiSlide] = useState(0);
@@ -78,17 +82,32 @@ function Carousel() {
         setX(x - 100);
         setActiSlide(activeSlide + 1);
     }
+
+    const onFilterChange = (e) => {
+        let selectedFilter = e.target.value;
+        setFiterCategory(selectedFilter);
+        setX(0);
+        setActiSlide(0);
+        let slide = selectedFilter === 'all' ? dishes : dishes.filter((dish) => dish.category === selectedFilter);
+        setSlides(slide);
+        setLeftEnable(true)
+    }
     return (<div className={`carosuel`}>
         {!isLeftEnabled && <button className={`btn btn-left`} onClick={onLeftClick}>{'<'}</button>}
         <div className={`track-container`}>
             <ul className={`track`}>
-                {slides.map((ele, index) =>
+                {slides && slides.map((ele, index) =>
                     <li key={index} className={`slide`} style={{ left: `${(activeSlide > 0 && index === slides.length - 1 ? 10 * activeSlide : 0) + (activeSlide === 1 && index === 0 ? 10 : 0) + (index === 0 ? 0 : 90 + (index - 1) * 80)}%`, transform: `translateX(${x}%)`, width: `${index === 0 || slides.length - 1 === index ? '90%' : '80%'}` }}><Card data={ele} /></li>
                 )}
             </ul>
         </div>
         {!isRightEnabled && <button className={`btn btn-right`} onClick={onRightClick}>{'>'}</button>}
-
+        {categories && <div className={`catg`}>
+            Filter By category
+            <select value={selectedCtg} onChange={onFilterChange}>
+                {categories.map((catg, index) => <option key={index} value={catg}>{catg}</option>)}
+            </select>
+        </div>}
     </div>)
 }
 
